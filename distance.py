@@ -52,7 +52,7 @@ def normalize(distance):
 # print(normalize(euclid(A,B)))
 # print(normalize(euclid_on_maps(critics['Lisa Rose'],critics['Gene Seymour'])))
 
-def friends_map(a,distance_function):
+def get_friends_map(a,distance_function):
     friends = {}
     for key in critics.keys():
         if key != a:
@@ -61,10 +61,16 @@ def friends_map(a,distance_function):
 
 # print(friends_map('Lisa Rose',euclid_on_maps))
 
-def best_friend(friends_map):
-    return max(friends_map, key=friends_map.get)
-
-# print(best_friend(friends_map('Lisa Rose',euclid_on_maps)))
+def rank_friends(a,distance_function):
+    """
+    rank friends 
+    """
+    friends_map = get_friends_map(a,distance_function)
+    print('--------------------')
+    print(f'Using {distance_function.__name__}, person {a} is close with')
+    for i,key in enumerate(sorted(friends_map, key=friends_map.get, reverse=True)):
+        print(f'  rank {i+1} : {key} with distance {friends_map[key]}')
+    print('--------------------')
 
 def pearson_on_maps(map_a, map_b):
     """
@@ -86,5 +92,6 @@ def pearson_on_maps(map_a, map_b):
         denominator = math.sqrt((common_films*sum_square_a - sum_a**2) * (common_films*sum_square_b - sum_b**2))
     return numerator/denominator
     
-print(pearson_on_maps(critics['Lisa Rose'],critics['Gene Seymour']))
-print(best_friend(friends_map('Lisa Rose',pearson_on_maps)))
+#print(pearson_on_maps(critics['Lisa Rose'],critics['Gene Seymour']))
+rank_friends('Lisa Rose',pearson_on_maps)
+rank_friends('Lisa Rose',euclid_on_maps)
