@@ -36,7 +36,7 @@ def euclid(a,b):
 
 #print(euclid(A,B))
 
-def euclid_on_maps(map_a, map_b):
+def euclid_on_maps_normalized(map_a, map_b):
     """
     Returns euclidian distance between maps map_a and map_b
     """
@@ -44,22 +44,16 @@ def euclid_on_maps(map_a, map_b):
     for key in map_b.keys():
         if key in map_a:
             euclid_dist += (map_b[key]-map_a[key])**2
-    return math.sqrt(euclid_dist)
-
-def normalize(distance):
-    return 1/(1+distance)
-
-# print(normalize(euclid(A,B)))
-# print(normalize(euclid_on_maps(critics['Lisa Rose'],critics['Gene Seymour'])))
+    return 1/(1+math.sqrt(euclid_dist))
 
 def get_friends_map(a,distance_function):
     friends = {}
     for key in critics.keys():
         if key != a:
-            friends.update({key:normalize(distance_function(critics[a],critics[key]))})
+            friends.update({key:distance_function(critics[a],critics[key])})
     return friends
 
-# print(friends_map('Lisa Rose',euclid_on_maps))
+# print(friends_map('Lisa Rose',euclid_on_maps_normalized))
 
 def rank_friends(a,distance_function):
     """
@@ -94,4 +88,4 @@ def pearson_on_maps(map_a, map_b):
     
 #print(pearson_on_maps(critics['Lisa Rose'],critics['Gene Seymour']))
 rank_friends('Lisa Rose',pearson_on_maps)
-rank_friends('Lisa Rose',euclid_on_maps)
+rank_friends('Lisa Rose',euclid_on_maps_normalized)
