@@ -97,5 +97,37 @@ def pearson_on_maps(map_a, map_b):
 
 
 # print(pearson_on_maps(critics['Lisa Rose'],critics['Gene Seymour']))
-rank_friends('Lisa Rose', pearson_on_maps)
-rank_friends('Lisa Rose', euclid_on_maps_normalized)
+#rank_friends('Lisa Rose', pearson_on_maps)
+#rank_friends('Lisa Rose', euclid_on_maps_normalized)
+
+rank_friends('Toby',pearson_on_maps)
+
+def get_all_films():
+    all_films = []
+    for person in critics.values():
+        for film in person.keys():
+            if not all_films.__contains__(film):
+                all_films.append(film)
+    return all_films
+
+#print(get_all_films())
+
+def get_all_film_unwatched_by(person):
+    films = get_all_films()
+    for film in critics[person].keys():
+        films.remove(film)
+    return films
+
+#print(get_all_film_unwatched_by('Toby'))
+
+def get_recommandation(friend_map, movie):
+    sim_sum = sx_sum = 0
+    for person in friend_map.keys():
+        if critics[person].keys().__contains__(movie) and friend_map[person] >= 0:
+            print(f'person {person} with sim {friend_map[person]} gave note {critics[person][movie]} to {movie}')
+            sim_sum += friend_map[person]
+            sx_sum += friend_map[person]*critics[person][movie]
+    return sx_sum/sim_sum
+
+print(get_recommandation(get_friends_map('Toby',pearson_on_maps),'The Night Listener'))
+
