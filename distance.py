@@ -34,7 +34,7 @@ def euclid(a,b):
         euclid_dist += (b[i]-a[i])**2
     return math.sqrt(euclid_dist)
 
-print(euclid(A,B))
+#print(euclid(A,B))
 
 def euclid_on_maps(map_a, map_b):
     """
@@ -49,19 +49,42 @@ def euclid_on_maps(map_a, map_b):
 def normalize(distance):
     return 1/(1+distance)
 
-print(normalize(euclid(A,B)))
-print(normalize(euclid_on_maps(critics['Lisa Rose'],critics['Gene Seymour'])))
+# print(normalize(euclid(A,B)))
+# print(normalize(euclid_on_maps(critics['Lisa Rose'],critics['Gene Seymour'])))
 
-def friends_map(a, critics):
+def friends_map(a,distance_function):
     friends = {}
     for key in critics.keys():
         if key != a:
-            friends.update({key:normalize(euclid_on_maps(critics[a],critics[key]))})
+            friends.update({key:normalize(distance_function(critics[a],critics[key]))})
     return friends
 
-print(friends_map('Lisa Rose',critics))
+# print(friends_map('Lisa Rose',euclid_on_maps))
 
 def best_friend(friends_map):
     return max(friends_map, key=friends_map.get)
 
-print(best_friend(friends_map('Lisa Rose',critics)))
+# print(best_friend(friends_map('Lisa Rose',euclid_on_maps)))
+
+def pearson_on_maps(map_a, map_b):
+    """
+    pearson distance with maps
+    """
+    common_films = sum_a = sum_b = sum_axb = sum_square_a = sum_square_b = 0
+    for key in map_b.keys():
+        if key in map_a:
+            sum_a += map_a[key]
+            sum_b += map_b[key]
+            sum_axb += map_a[key]*map_b[key]
+            sum_square_a += map_a[key]**2
+            sum_square_b += map_b[key]**2
+            common_films += 1
+    if common_films == 0:
+        return 0
+    else:
+        numerator = common_films*sum_axb - sum_a*sum_b
+        denominator = math.sqrt((common_films*sum_square_a - sum_a**2) * (common_films*sum_square_b - sum_b**2))
+    return numerator/denominator
+    
+print(pearson_on_maps(critics['Lisa Rose'],critics['Gene Seymour']))
+print(best_friend(friends_map('Lisa Rose',pearson_on_maps)))
