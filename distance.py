@@ -1,4 +1,4 @@
-#/usr/bin python3
+# /usr/bin python3
 
 import math
 
@@ -22,21 +22,6 @@ critics = {'Lisa Rose': {'Lady in the Water': 2.5, 'Snakes on a Plane': 3.5,
                              'The Night Listener': 3.0, 'Superman Returns': 5.0, 'You, Me and Dupree': 3.5},
            'Toby': {'Snakes on a Plane': 4.5, 'You, Me and Dupree': 1.0, 'Superman Returns': 4.0}}
 
-A = [1, 2, 3, 4]
-B = [2, 3, 4, 5]
-
-
-def euclid(a, b):
-    """
-    Returns euclidian distance between vectors a and b
-    """
-    euclid_dist = 0
-    for i, _ in enumerate(a):
-        euclid_dist += (b[i]-a[i])**2
-    return math.sqrt(euclid_dist)
-
-# print(euclid(A,B))
-
 
 def euclid_on_maps_normalized(map_a, map_b):
     """
@@ -49,26 +34,27 @@ def euclid_on_maps_normalized(map_a, map_b):
     return 1/(1+math.sqrt(euclid_dist))
 
 
-def get_friends_map(a, distance_function):
+def get_friends_map(person, distance_function):
     """
-    create a map with all other persons as key and a's distance with them as value
+    create a map with all other persons as key and person's distance with them as value
     """
     friends = {}
     for key in critics.keys():
-        if key != a:
-            friends.update({key: distance_function(critics[a], critics[key])})
+        if key != person:
+            friends.update({key: distance_function(
+                critics[person], critics[key])})
     return friends
 
 # print(friends_map('Lisa Rose',euclid_on_maps_normalized))
 
 
-def rank_friends(a, distance_function):
+def rank_friends(person, distance_function):
     """
     rank friends from closest to farthest using the chosen function
     """
-    friends_map = get_friends_map(a, distance_function)
+    friends_map = get_friends_map(person, distance_function)
     print('--------------------')
-    print(f'Using {distance_function.__name__}, person {a} is close with')
+    print(f'Using {distance_function.__name__}, person {person} is close with')
     for i, key in enumerate(sorted(friends_map, key=friends_map.get, reverse=True)):
         print(f'  rank {i+1} : {key} with distance {friends_map[key]}')
     print('--------------------')
@@ -97,10 +83,11 @@ def pearson_on_maps(map_a, map_b):
 
 
 # print(pearson_on_maps(critics['Lisa Rose'],critics['Gene Seymour']))
-#rank_friends('Lisa Rose', pearson_on_maps)
-#rank_friends('Lisa Rose', euclid_on_maps_normalized)
+# rank_friends('Lisa Rose', pearson_on_maps)
+# rank_friends('Lisa Rose', euclid_on_maps_normalized)
 
-rank_friends('Toby',pearson_on_maps)
+rank_friends('Toby', pearson_on_maps)
+
 
 def get_all_films():
     all_films = []
@@ -110,7 +97,8 @@ def get_all_films():
                 all_films.append(film)
     return all_films
 
-#print(get_all_films())
+# print(get_all_films())
+
 
 def get_all_film_unwatched_by(person):
     films = get_all_films()
@@ -118,16 +106,39 @@ def get_all_film_unwatched_by(person):
         films.remove(film)
     return films
 
-#print(get_all_film_unwatched_by('Toby'))
+# print(get_all_film_unwatched_by('Toby'))
+
 
 def get_recommandation(friend_map, movie):
     sim_sum = sx_sum = 0
     for person in friend_map.keys():
         if critics[person].keys().__contains__(movie) and friend_map[person] >= 0:
-            print(f'person {person} with sim {friend_map[person]} gave note {critics[person][movie]} to {movie}')
+            # print(f'person {person} with sim {friend_map[person]} gave note {critics[person][movie]} to {movie}')
             sim_sum += friend_map[person]
             sx_sum += friend_map[person]*critics[person][movie]
     return sx_sum/sim_sum
 
-print(get_recommandation(get_friends_map('Toby',pearson_on_maps),'The Night Listener'))
+# print(get_recommandation(get_friends_map('Toby',pearson_on_maps),'The Night Listener'))
 
+
+def get_recommandation_map(person, distance_function):
+    unwatched_films = get_all_film_unwatched_by(person)
+    friend_map = get_friends_map(person, distance_function)
+    recommandation_map = {}
+    for film in unwatched_films:
+        recommandation_map.update({film: get_recommandation(friend_map, film)})
+    return recommandation_map
+
+
+def rank_movie(person, distance_function):
+    recommandation_map = get_recommandation_map(person, distance_function)
+    print('--------------------')
+    print(
+        f'Using {distance_function.__name__}, person {person} may like to watch')
+    for i, key in enumerate(sorted(recommandation_map, key=recommandation_map.get, reverse=True)):
+        print(
+            f'  rank {i+1} : {key} with recommandation {recommandation_map[key]}')
+    print('--------------------')
+
+
+rank_movie('Toby', pearson_on_maps)
