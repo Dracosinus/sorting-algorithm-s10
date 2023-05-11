@@ -41,13 +41,8 @@ def euclid_on_maps(map_a, map_b):
     Returns euclidian distance between maps map_a and map_b
     """
     euclid_dist = 0
-    for key in map_a.keys():
-        if not key in map_b:
-            euclid_dist += map_a[key]**2
     for key in map_b.keys():
-        if not key in map_a:
-            euclid_dist += map_b[key]**2
-        else:
+        if key in map_a:
             euclid_dist += (map_b[key]-map_a[key])**2
     return math.sqrt(euclid_dist)
 
@@ -66,3 +61,7 @@ def friends_map(a, critics):
 
 print(friends_map('Lisa Rose',critics))
 
+def best_friend(friends_map):
+    return max(friends_map, key=friends_map.get)
+
+print(best_friend(friends_map('Lisa Rose',critics)))
