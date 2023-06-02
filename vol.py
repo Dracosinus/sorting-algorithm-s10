@@ -3,10 +3,12 @@
 import xml.etree.ElementTree as ET
 import os
 import random
+import copy
 from datetime import datetime
 
-LAST_BUS_DEPART  =datetime.fromisoformat('2010-07-27 17:00:00')
-FIRST_BUS_ARRIVAL=datetime.fromisoformat('2010-08-03 15:00:00')
+LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
+FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
+
 
 class Flight:
     def __init__(self, price, stops, orig, dest, depart, arrive, airline_display, conf_role):
@@ -42,6 +44,7 @@ class Flight:
 
 #     return flights
 
+
 def load_flights_from_xml(filename):
     flights = []
     tree = ET.parse(filename)
@@ -58,6 +61,7 @@ def load_flights_from_xml(filename):
                 flights.append(flight)
     return flights
 
+
 def find_all_flights_in_directory(directory):
     cheapest_flights = {}
 
@@ -69,6 +73,7 @@ def find_all_flights_in_directory(directory):
             cheapest_flights[key] = all_flights
 
     return cheapest_flights
+
 
 def merge_flights(flights1, flights2):
     merged_flights = {}
@@ -86,6 +91,7 @@ def merge_flights(flights1, flights2):
 
     return merged_flights
 
+
 def print_flight(flight):
     print('Price:', flight.price)
     print('Stops:', flight.stops)
@@ -97,18 +103,19 @@ def print_flight(flight):
     print('ConfRole:', flight.conf_role)
     print('---')
 
+
 def get_random_solution(flights):
     solution = {}
-    print(len(flights))
-    for key,flights_list in flights.items():
-        print(key)
+    for key, flights_list in flights.items():
         solution[key] = random.choice(flights_list)
     return solution
 
+
 def print_solution(solution):
-    for key,flight in solution.items():
+    for key, flight in solution.items():
         print(f'For Key : {key}')
         print_flight(flight)
+
 
 def calculate_total_price(solution):
     total_price = 0
@@ -116,47 +123,54 @@ def calculate_total_price(solution):
         total_price += flights.price
     return total_price
 
+
+def get_neighbours(solution, all_flights):
+    neighbours = []
+    for key, flight in solution.items():
+        flight_list = all_flights[key]
+        index = flight_list.index(flight)
+        if index > 0:
+            neighbour = copy.copy(solution)
+            neighbour[key] = flight_list[index-1]
+            neighbours.append(neighbour)
+        if index+1 < len(flight_list):
+            neighbour = copy.copy(solution)
+            neighbour[key] = flight_list[index+1]
+            neighbours.append(neighbour)
+    return neighbours
+
+
 def generate_all_flights():
     directory_0726 = 'ThirdParty/FlightData/2010/07-26/'
     cheapest_flights_0726 = find_all_flights_in_directory(directory_0726)
 
     directory_0727 = 'ThirdParty/FlightData/2010/07-27/'
     cheapest_flights_0727 = find_all_flights_in_directory(directory_0727)
-    ongoing_flights = merge_flights(cheapest_flights_0726, cheapest_flights_0727)
-
+    ongoing_flights = merge_flights(
+        cheapest_flights_0726, cheapest_flights_0727)
 
     directory_0803 = 'ThirdParty/FlightData/2010/08-03/'
     cheapest_flights_0803 = find_all_flights_in_directory(directory_0803)
 
     directory_0804 = 'ThirdParty/FlightData/2010/08-04/'
     cheapest_flights_0804 = find_all_flights_in_directory(directory_0804)
-    outgoing_flights = merge_flights(cheapest_flights_0803, cheapest_flights_0804)
+    outgoing_flights = merge_flights(
+        cheapest_flights_0803, cheapest_flights_0804)
 
     all_flights = merge_flights(ongoing_flights, outgoing_flights)
     return all_flights
 
 # Main
 
+
 all_flights = generate_all_flights()
-
-# print(len(all_flights['JFK-LHR']))
-# print(len(all_flights['LYS-LHR']))
-
-# jfk_date = datetime.fromisoformat('2010-07-27T09:25:00')
-# print(jfk_date <= LAST_BUS_DEPART)
-# print(jfk_date)
-
-# first_flight = all_flights['BER-LHR'][0]
-# print_flight(first_flight)
-# # Perform operations with the datetime objects
-# time_difference = first_flight.arrive - first_flight.depart
-# duration_in_hours = time_difference.total_seconds() / 3600
-
-# # Print the results
-# print('Departure:', first_flight.depart)
-# print('Arrival:', first_flight.arrive)
-# print('Duration (hours):', duration_in_hours)
-
 solution = get_random_solution(all_flights)
-print_solution(solution)
-print(f'Total price for this solution is {calculate_total_price(solution)}')
+neighbours = get_neighbours(solution, all_flights)
+
+for i,neighbour in enumerate(neighbours):
+    print("=======================")
+    print(f'Neighbour {i}')
+    print_solution(neighbour)
+    print("=======================")
+# print_solution(solution)
+# print(f'Total price for this solution is {calculate_total_price(solution)}')
