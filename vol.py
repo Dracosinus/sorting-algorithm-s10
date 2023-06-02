@@ -139,6 +139,15 @@ def get_neighbours(solution, all_flights):
             neighbours.append(neighbour)
     return neighbours
 
+def find_best_neighbour(solution, neighbours):
+    best_neighbour=solution
+    best_price=calculate_total_price(best_neighbour)
+    for neighbour in neighbours:
+        if calculate_total_price(neighbour) < best_price:
+            best_neighbour=neighbour
+            best_price=calculate_total_price(neighbour)
+    return best_neighbour
+        
 
 def generate_all_flights():
     directory_0726 = 'ThirdParty/FlightData/2010/07-26/'
@@ -161,16 +170,12 @@ def generate_all_flights():
     return all_flights
 
 # Main
-
-
 all_flights = generate_all_flights()
 solution = get_random_solution(all_flights)
 neighbours = get_neighbours(solution, all_flights)
+best_neighbour = find_best_neighbour(solution, neighbours)
+print(f'Total price for this neighbour is {calculate_total_price(best_neighbour)}')
+print(f'It is cheaper than {calculate_total_price(solution)}')
 
-for i,neighbour in enumerate(neighbours):
-    print("=======================")
-    print(f'Neighbour {i}')
-    print_solution(neighbour)
-    print("=======================")
 # print_solution(solution)
 # print(f'Total price for this solution is {calculate_total_price(solution)}')
