@@ -4,10 +4,12 @@ import xml.etree.ElementTree as ET
 import os
 import random
 import copy
-from datetime import datetime
+import math
+from datetime import datetime,time
 
 LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
 FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
+PRICE_PER_MINUTE = 1
 
 
 class Flight:
@@ -32,18 +34,6 @@ class Flight:
         airline_display = element.find('airline_display').text
 
         return cls(price, stops, orig, dest, depart, arrive, airline_display, 'incoming')
-
-# def load_flights_from_xml(filename):
-#     flights = []
-#     tree = ET.parse(filename)
-#     root = tree.getroot()
-
-#     for flight_element in root.findall('flight'):
-#         flight = Flight.from_xml_element(flight_element)
-#         flights.append(flight)
-
-#     return flights
-
 
 def load_flights_from_xml(filename):
     flights = []
@@ -119,10 +109,31 @@ def print_solution(solution):
 
 def calculate_total_price(solution):
     total_price = 0
-    for flights in solution.values():
-        total_price += flights.price
+    for flight in solution.values():
+        total_price += flight.price
+
+        if flight.conf_role == 'incoming':
+            duration = LAST_BUS_DEPART - flight.arrive
+        else:
+            duration = flight.depart - FIRST_BUS_ARRIVAL
+        difference_in_mins=duration.total_seconds() / 60.0
+        waiting_price=difference_in_mins*PRICE_PER_MINUTE
+        if difference_in_mins >= 120:
+            waiting_price+=100
+        total_price+=waiting_price
+
     return total_price
 
+def calculate_spent_time_in_mins(solution):
+    spent_time = 0
+    for flight in solution.values():
+        if flight.conf_role == 'incoming':
+            duration = LAST_BUS_DEPART - flight.arrive
+        else:
+            duration = flight.depart - FIRST_BUS_ARRIVAL
+        difference_in_mins=duration.total_seconds() / 60.0
+        spent_time+=difference_in_mins
+    return spent_time
 
 def get_neighbours(solution, all_flights):
     neighbours = []
@@ -158,6 +169,28 @@ def find_minimum_local(solution, all_flights):
         best_neighbour=find_best_neighbour(current_best, neighbours)
     return best_neighbour
 
+def simulated_annealing_neighbour(solution, neighbours):
+    cool = 0.95
+    if 'temperature' not in globals():
+        globals()['temperature'] = 10000
+    random_neighbour = random.choice(neighbours)
+    probability = math.e ** -(abs(calculate_total_price(random_neighbour) - calculate_total_price(solution))/globals()['temperature'])
+    globals()['temperature'] = globals()['temperature']*cool
+    if probability >= random.random():
+        return random_neighbour
+    else:
+        return solution
+
+def find_minimum_annealing(solution, all_flights):
+    current_best = solution
+    neighbours = get_neighbours(current_best, all_flights)
+    best_neighbour=simulated_annealing_neighbour(current_best, neighbours)
+    while(globals()['temperature'] >= 20):
+        current_best = best_neighbour
+        neighbours = get_neighbours(current_best, all_flights)
+        best_neighbour=simulated_annealing_neighbour(current_best, neighbours)
+    return best_neighbour
+
 def generate_all_flights():
     directory_0726 = 'ThirdParty/FlightData/2010/07-26/'
     cheapest_flights_0726 = find_all_flights_in_directory(directory_0726)
@@ -178,12 +211,19 @@ def generate_all_flights():
     all_flights = merge_flights(ongoing_flights, outgoing_flights)
     return all_flights
 
+def write_report(solution, minimum):
+    print(f'Total price for this neighbour is {calculate_total_price(minimum)}')
+    print(f'Attendees will wait {calculate_spent_time_in_mins(minimum)} mins.')
+    print(f'It is cheaper than {calculate_total_price(solution)} where they would have waited {calculate_spent_time_in_mins(solution)} mins.')
+
 # Main
 all_flights = generate_all_flights()
 solution = get_random_solution(all_flights)
 minimum = find_minimum_local(solution, all_flights)
-print(f'Total price for this neighbour is {calculate_total_price(minimum)}')
-print(f'It is cheaper than {calculate_total_price(solution)}')
+write_report(solution, minimum)
+
+minimum = find_minimum_annealing(solution, all_flights)
+write_report(solution, minimum)
 
 # print_solution(solution)
 # print(f'Total price for this solution is {calculate_total_price(solution)}')
