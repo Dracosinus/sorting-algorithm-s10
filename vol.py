@@ -49,22 +49,6 @@ def find_all_flights_in_directory(directory):
 
     return cheapest_flights
 
-# def find_cheapest_flight_in_xml(filename):
-#     tree = ET.parse(filename)
-#     root = tree.getroot()
-
-#     cheapest_price = float('inf')
-#     cheapest_flight = None
-
-#     for flight_element in root.findall('flight'):
-#         flight = Flight.from_xml_element(flight_element)
-#         price = float(flight.price)
-#         if price < cheapest_price:
-#             cheapest_price = price
-#             cheapest_flight = flight
-
-#     return cheapest_flight
-
 def merge_flights(flights1, flights2):
     merged_flights = {}
 
@@ -108,24 +92,28 @@ def calculate_total_price(solution):
         total_price += flights.price
     return total_price
 
+def generate_all_flights():
+    directory_0726 = 'ThirdParty/FlightData/2010/07-26/'
+    cheapest_flights_0726 = find_all_flights_in_directory(directory_0726)
+
+    directory_0727 = 'ThirdParty/FlightData/2010/07-27/'
+    cheapest_flights_0727 = find_all_flights_in_directory(directory_0727)
+    ongoing_flights = merge_flights(cheapest_flights_0726, cheapest_flights_0727)
+
+
+    directory_0803 = 'ThirdParty/FlightData/2010/08-03/'
+    cheapest_flights_0803 = find_all_flights_in_directory(directory_0803)
+
+    directory_0804 = 'ThirdParty/FlightData/2010/08-04/'
+    cheapest_flights_0804 = find_all_flights_in_directory(directory_0804)
+    outgoing_flights = merge_flights(cheapest_flights_0803, cheapest_flights_0804)
+
+    all_flights = merge_flights(ongoing_flights, outgoing_flights)
+    return all_flights
+
 # Main
-directory_0726 = 'ThirdParty/FlightData/2010/07-26/'
-cheapest_flights_0726 = find_all_flights_in_directory(directory_0726)
 
-directory_0727 = 'ThirdParty/FlightData/2010/07-26/'
-cheapest_flights_0727 = find_all_flights_in_directory(directory_0726)
-ongoing_flights = merge_flights(cheapest_flights_0726, cheapest_flights_0727)
-
-
-directory_0803 = 'ThirdParty/FlightData/2010/08-03/'
-cheapest_flights_0803 = find_all_flights_in_directory(directory_0803)
-
-directory_0804 = 'ThirdParty/FlightData/2010/08-04/'
-cheapest_flights_0804 = find_all_flights_in_directory(directory_0804)
-outgoing_flights = merge_flights(cheapest_flights_0803, cheapest_flights_0804)
-
-all_flights = merge_flights(ongoing_flights, outgoing_flights)
-
+all_flights = generate_all_flights()
 
 # first_flight = all_flights['BER-LHR'][0]
 # first_flight_price = first_flight.price
@@ -133,4 +121,4 @@ all_flights = merge_flights(ongoing_flights, outgoing_flights)
 
 solution = get_random_solution(all_flights)
 print_solution(solution)
-print(calculate_total_price(solution))
+print(f'Total price for this solution is {calculate_total_price(solution)}')
