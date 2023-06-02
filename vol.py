@@ -147,7 +147,16 @@ def find_best_neighbour(solution, neighbours):
             best_neighbour=neighbour
             best_price=calculate_total_price(neighbour)
     return best_neighbour
-        
+
+def find_minimum_local(solution, all_flights):
+    current_best = solution
+    neighbours = get_neighbours(current_best, all_flights)
+    best_neighbour=find_best_neighbour(current_best, neighbours)
+    while(best_neighbour != current_best):
+        current_best = best_neighbour
+        neighbours = get_neighbours(current_best, all_flights)
+        best_neighbour=find_best_neighbour(current_best, neighbours)
+    return best_neighbour
 
 def generate_all_flights():
     directory_0726 = 'ThirdParty/FlightData/2010/07-26/'
@@ -172,9 +181,8 @@ def generate_all_flights():
 # Main
 all_flights = generate_all_flights()
 solution = get_random_solution(all_flights)
-neighbours = get_neighbours(solution, all_flights)
-best_neighbour = find_best_neighbour(solution, neighbours)
-print(f'Total price for this neighbour is {calculate_total_price(best_neighbour)}')
+minimum = find_minimum_local(solution, all_flights)
+print(f'Total price for this neighbour is {calculate_total_price(minimum)}')
 print(f'It is cheaper than {calculate_total_price(solution)}')
 
 # print_solution(solution)
