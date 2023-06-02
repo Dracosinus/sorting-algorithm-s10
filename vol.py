@@ -3,9 +3,13 @@
 import xml.etree.ElementTree as ET
 import os
 import random
+from datetime import datetime
+
+LAST_BUS_DEPART  =datetime.fromisoformat('2010-07-27 17:00:00')
+FIRST_BUS_ARRIVAL=datetime.fromisoformat('2010-08-03 15:00:00')
 
 class Flight:
-    def __init__(self, price, stops, orig, dest, depart, arrive, airline_display):
+    def __init__(self, price, stops, orig, dest, depart, arrive, airline_display, conf_role):
         self.price = price
         self.stops = stops
         self.orig = orig
@@ -13,6 +17,7 @@ class Flight:
         self.depart = depart
         self.arrive = arrive
         self.airline_display = airline_display
+        self.conf_role = conf_role
 
     @classmethod
     def from_xml_element(cls, element):
@@ -20,11 +25,22 @@ class Flight:
         stops = element.find('stops').text
         orig = element.find('orig').text
         dest = element.find('dest').text
-        depart = element.find('depart').text
-        arrive = element.find('arrive').text
+        depart = datetime.fromisoformat(element.find('depart').text)
+        arrive = datetime.fromisoformat(element.find('arrive').text)
         airline_display = element.find('airline_display').text
 
-        return cls(price, stops, orig, dest, depart, arrive, airline_display)
+        return cls(price, stops, orig, dest, depart, arrive, airline_display, 'incoming')
+
+# def load_flights_from_xml(filename):
+#     flights = []
+#     tree = ET.parse(filename)
+#     root = tree.getroot()
+
+#     for flight_element in root.findall('flight'):
+#         flight = Flight.from_xml_element(flight_element)
+#         flights.append(flight)
+
+#     return flights
 
 def load_flights_from_xml(filename):
     flights = []
@@ -33,8 +49,13 @@ def load_flights_from_xml(filename):
 
     for flight_element in root.findall('flight'):
         flight = Flight.from_xml_element(flight_element)
-        flights.append(flight)
-
+        if '08-03' in filename or '08-04' in filename:
+            flight.conf_role = 'outgoing'
+            if flight.depart >= FIRST_BUS_ARRIVAL:
+                flights.append(flight)
+        else:
+            if flight.arrive <= LAST_BUS_DEPART:
+                flights.append(flight)
     return flights
 
 def find_all_flights_in_directory(directory):
@@ -73,11 +94,14 @@ def print_flight(flight):
     print('Departure:', flight.depart)
     print('Arrival:', flight.arrive)
     print('Airline:', flight.airline_display)
+    print('ConfRole:', flight.conf_role)
     print('---')
 
 def get_random_solution(flights):
     solution = {}
+    print(len(flights))
     for key,flights_list in flights.items():
+        print(key)
         solution[key] = random.choice(flights_list)
     return solution
 
@@ -115,9 +139,23 @@ def generate_all_flights():
 
 all_flights = generate_all_flights()
 
+# print(len(all_flights['JFK-LHR']))
+# print(len(all_flights['LYS-LHR']))
+
+# jfk_date = datetime.fromisoformat('2010-07-27T09:25:00')
+# print(jfk_date <= LAST_BUS_DEPART)
+# print(jfk_date)
+
 # first_flight = all_flights['BER-LHR'][0]
-# first_flight_price = first_flight.price
 # print_flight(first_flight)
+# # Perform operations with the datetime objects
+# time_difference = first_flight.arrive - first_flight.depart
+# duration_in_hours = time_difference.total_seconds() / 3600
+
+# # Print the results
+# print('Departure:', first_flight.depart)
+# print('Arrival:', first_flight.arrive)
+# print('Duration (hours):', duration_in_hours)
 
 solution = get_random_solution(all_flights)
 print_solution(solution)
