@@ -5,11 +5,12 @@ import os
 import random
 import copy
 import math
-from datetime import datetime,time
+from datetime import datetime, time
 
 LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
 FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
 PRICE_PER_MINUTE = 5
+NUMBER_OF_GENETIC_POOL_MEMBERS = 8
 
 
 class Flight:
@@ -34,6 +35,7 @@ class Flight:
         airline_display = element.find('airline_display').text
 
         return cls(price, stops, orig, dest, depart, arrive, airline_display, 'incoming')
+
 
 def load_flights_from_xml(filename):
     flights = []
@@ -82,124 +84,6 @@ def merge_flights(flights1, flights2):
     return merged_flights
 
 
-def print_flight(flight):
-    print('Price:', flight.price)
-    print('Stops:', flight.stops)
-    print('Origin:', flight.orig)
-    print('Destination:', flight.dest)
-    print('Departure:', flight.depart)
-    print('Arrival:', flight.arrive)
-    print('Airline:', flight.airline_display)
-    print('ConfRole:', flight.conf_role)
-    print('---')
-
-
-def get_random_solution(flights):
-    solution = {}
-    for key, flights_list in flights.items():
-        solution[key] = random.choice(flights_list)
-    return solution
-
-
-def print_solution(solution):
-    for key, flight in solution.items():
-        print(f'For Key : {key}')
-        print_flight(flight)
-
-
-def calculate_total_price(solution):
-    total_price = 0
-    for flight in solution.values():
-        total_price += flight.price
-
-        if flight.conf_role == 'incoming':
-            duration = LAST_BUS_DEPART - flight.arrive
-        else:
-            duration = flight.depart - FIRST_BUS_ARRIVAL
-        difference_in_mins=duration.total_seconds() / 60.0
-        waiting_price=difference_in_mins*PRICE_PER_MINUTE
-        if difference_in_mins >= 120:
-            waiting_price+=100
-        total_price+=waiting_price
-
-    return total_price
-
-def calculate_spent_time_in_mins(solution):
-    spent_time = 0
-    for flight in solution.values():
-        if flight.conf_role == 'incoming':
-            duration = LAST_BUS_DEPART - flight.arrive
-        else:
-            duration = flight.depart - FIRST_BUS_ARRIVAL
-        difference_in_mins=duration.total_seconds() / 60.0
-        spent_time+=difference_in_mins
-        # (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
-        # print(f'we just added {days} days, {hours} hours, {mins} mins')
-    return spent_time
-
-def divide_mins_to_days_hours_mins(duree_minutes):
-    jours = duree_minutes // (24 * 60)
-    heures = (duree_minutes // 60) % 24
-    minutes = duree_minutes % 60
-    return (jours, heures, minutes)
-
-def get_neighbours(solution, all_flights):
-    neighbours = []
-    for key, flight in solution.items():
-        flight_list = all_flights[key]
-        index = flight_list.index(flight)
-        if index > 0:
-            neighbour = copy.copy(solution)
-            neighbour[key] = flight_list[index-1]
-            neighbours.append(neighbour)
-        if index+1 < len(flight_list):
-            neighbour = copy.copy(solution)
-            neighbour[key] = flight_list[index+1]
-            neighbours.append(neighbour)
-    return neighbours
-
-def find_best_neighbour(solution, neighbours):
-    best_neighbour=solution
-    best_price=calculate_total_price(best_neighbour)
-    for neighbour in neighbours:
-        if calculate_total_price(neighbour) < best_price:
-            best_neighbour=neighbour
-            best_price=calculate_total_price(neighbour)
-    return best_neighbour
-
-def find_minimum_local(solution, all_flights):
-    current_best = solution
-    neighbours = get_neighbours(current_best, all_flights)
-    best_neighbour=find_best_neighbour(current_best, neighbours)
-    while(best_neighbour != current_best):
-        current_best = best_neighbour
-        neighbours = get_neighbours(current_best, all_flights)
-        best_neighbour=find_best_neighbour(current_best, neighbours)
-    return best_neighbour
-
-def simulated_annealing_neighbour(solution, neighbours):
-    cool = 0.95
-    if 'temperature' not in globals():
-        globals()['temperature'] = 10000
-    random_neighbour = random.choice(neighbours)
-    ##probability = math.e ** -(abs(calculate_total_price(random_neighbour) - calculate_total_price(solution))/globals()['temperature'])
-    probability = math.e ** ((- calculate_total_price(random_neighbour) - calculate_total_price(solution))/globals()['temperature'])
-    globals()['temperature'] = globals()['temperature']*cool
-    if probability >= random.random():
-        return random_neighbour
-    else:
-        return solution
-
-def find_minimum_annealing(solution, all_flights):
-    current_best = solution
-    neighbours = get_neighbours(current_best, all_flights)
-    best_neighbour=simulated_annealing_neighbour(current_best, neighbours)
-    while(globals()['temperature'] >= 20):
-        current_best = best_neighbour
-        neighbours = get_neighbours(current_best, all_flights)
-        best_neighbour=simulated_annealing_neighbour(current_best, neighbours)
-    return best_neighbour
-
 def generate_all_flights():
     directory_0726 = 'ThirdParty/FlightData/2010/07-26/'
     cheapest_flights_0726 = find_all_flights_in_directory(directory_0726)
@@ -220,24 +104,210 @@ def generate_all_flights():
     all_flights = merge_flights(ongoing_flights, outgoing_flights)
     return all_flights
 
-def write_report(solution, minimum):
-    print(f'Total price for this neighbour is {calculate_total_price(minimum)}')
+
+ALL_FLIGHTS = generate_all_flights()
+
+
+def print_flight(flight):
+    print('Price:', flight.price)
+    print('Stops:', flight.stops)
+    print('Origin:', flight.orig)
+    print('Destination:', flight.dest)
+    print('Departure:', flight.depart)
+    print('Arrival:', flight.arrive)
+    print('Airline:', flight.airline_display)
+    print('ConfRole:', flight.conf_role)
+    print('---')
+
+
+def get_random_solution():
+    solution = {}
+    for key, flights_list in ALL_FLIGHTS.items():
+        solution[key] = random.choice(flights_list)
+    return solution
+
+
+def print_solution(solution):
+    for key, flight in solution.items():
+        print(f'For Key : {key}')
+        print_flight(flight)
+
+
+def calculate_total_price(solution):
+    total_price = 0
+    for flight in solution.values():
+        total_price += flight.price
+
+        if flight.conf_role == 'incoming':
+            duration = LAST_BUS_DEPART - flight.arrive
+        else:
+            duration = flight.depart - FIRST_BUS_ARRIVAL
+        difference_in_mins = duration.total_seconds() / 60.0
+        waiting_price = difference_in_mins*PRICE_PER_MINUTE
+        if difference_in_mins >= 120:
+            waiting_price += 100
+        total_price += waiting_price
+
+    return total_price
+
+
+def calculate_spent_time_in_mins(solution):
+    spent_time = 0
+    for flight in solution.values():
+        if flight.conf_role == 'incoming':
+            duration = LAST_BUS_DEPART - flight.arrive
+        else:
+            duration = flight.depart - FIRST_BUS_ARRIVAL
+        difference_in_mins = duration.total_seconds() / 60.0
+        spent_time += difference_in_mins
+        # (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
+        # print(f'we just added {days} days, {hours} hours, {mins} mins')
+    return spent_time
+
+
+def divide_mins_to_days_hours_mins(duree_minutes):
+    jours = duree_minutes // (24 * 60)
+    heures = (duree_minutes // 60) % 24
+    minutes = duree_minutes % 60
+    return (jours, heures, minutes)
+
+
+def get_neighbours(solution):
+    neighbours = []
+    for key, flight in solution.items():
+        flight_list = ALL_FLIGHTS[key]
+        index = flight_list.index(flight)
+        if index > 0:
+            neighbour = copy.copy(solution)
+            neighbour[key] = flight_list[index-1]
+            neighbours.append(neighbour)
+        if index+1 < len(flight_list):
+            neighbour = copy.copy(solution)
+            neighbour[key] = flight_list[index+1]
+            neighbours.append(neighbour)
+    return neighbours
+
+
+def find_best_neighbour(solution, neighbours):
+    best_neighbour = solution
+    best_price = calculate_total_price(best_neighbour)
+    for neighbour in neighbours:
+        if calculate_total_price(neighbour) < best_price:
+            best_neighbour = neighbour
+            best_price = calculate_total_price(neighbour)
+    return best_neighbour
+
+
+def find_minimum_local(solution):
+    current_best = solution
+    neighbours = get_neighbours(current_best)
+    best_neighbour = find_best_neighbour(current_best, neighbours)
+    while (best_neighbour != current_best):
+        current_best = best_neighbour
+        neighbours = get_neighbours(current_best)
+        best_neighbour = find_best_neighbour(current_best, neighbours)
+    return best_neighbour
+
+
+def simulated_annealing_neighbour(solution, neighbours):
+    cool = 0.95
+    if 'temperature' not in globals():
+        globals()['temperature'] = 10000
+    random_neighbour = random.choice(neighbours)
+    # probability = math.e ** -(abs(calculate_total_price(random_neighbour) - calculate_total_price(solution))/globals()['temperature'])
+    probability = math.e ** ((- calculate_total_price(random_neighbour) -
+                             calculate_total_price(solution))/globals()['temperature'])
+    globals()['temperature'] = globals()['temperature']*cool
+    if probability >= random.random():
+        return random_neighbour
+    else:
+        return solution
+
+
+def find_minimum_annealing(solution):
+    current_best = solution
+    neighbours = get_neighbours(current_best)
+    best_neighbour = simulated_annealing_neighbour(current_best, neighbours)
+    while (globals()['temperature'] >= 20):
+        current_best = best_neighbour
+        neighbours = get_neighbours(current_best)
+        best_neighbour = simulated_annealing_neighbour(
+            current_best, neighbours)
+    return best_neighbour
+
+
+def write_comparison_report(solution, minimum):
+    print(
+        f'Total price for this neighbour is {calculate_total_price(minimum)}')
     duree_minutes = calculate_spent_time_in_mins(minimum)
     (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
-    print(f"Attendees will wait {duree_minutes} mins, meaning : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
+    print(
+        f"Attendees will wait {duree_minutes} mins, meaning : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
     print(f'It is cheaper than {calculate_total_price(solution)} where')
     duree_minutes = calculate_spent_time_in_mins(solution)
     (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
-    print(f"Attendees would have waited : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
+    print(
+        f"Attendees would have waited : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
+
+
+def write_solution_report(solution):
+    print(
+        f'Total price for this neighbour is {calculate_total_price(solutionc`x`)}')
+    duree_minutes = calculate_spent_time_in_mins(solution)
+    (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
+    print(
+        f"Attendees will wait {duree_minutes} mins, meaning : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
+
+
+def monte_carlo_main(solution):
+    minimum = find_minimum_local(solution)
+    write_comparison_report(solution, minimum)
+
+
+def annealing_main(solution):
+    minimum = find_minimum_annealing(solution)
+    write_comparison_report(solution, minimum)
+
+
+def slice(first_parent, second_parent, gene_slicer):
+    first_child = second_child = {}
+    slice_count = 0
+    for key in first_parent.keys():
+        if slice_count < gene_slicer:
+            first_child[key] = first_parent[key]
+            second_child[key] = second_parent[key]
+        else:
+            first_child[key] = second_parent[key]
+            second_child[key] = second_parent[key]
+        slice_count = slice_count+1
+    return (first_child, second_child)
+
+
+def genetic_main():
+    genetic_solution_pool = []
+    for i in range(NUMBER_OF_GENETIC_POOL_MEMBERS):
+        solution = get_random_solution()
+        genetic_solution_pool.append(find_minimum_local(solution))
+    MAX_MUTATION = 5
+    mutated_solution_pool = genetic_solution_pool
+    for i in range(MAX_MUTATION):
+        mutated_solution_pool = mutate_solution(mutated_solution_pool)
+    for solution in mutated_solution_pool:
+        write_solution_report(solution)
+
+
+def mutate_solution(genetic_solution_pool):
+    mutated_solution_pool = []
+    for k in range(int(NUMBER_OF_GENETIC_POOL_MEMBERS/2)):
+        gene_slicer = random.randint(0, 17)
+        first_parent = genetic_solution_pool[2*k]
+        second_parent = genetic_solution_pool[2*k+1]
+        (first_child, second_child) = slice(
+            first_parent, second_parent, gene_slicer)
+        mutated_solution_pool.append(find_minimum_local(first_child))
+        mutated_solution_pool.append(find_minimum_local(second_child))
+    return mutated_solution_pool
+
 
 # Main
-all_flights = generate_all_flights()
-solution = get_random_solution(all_flights)
-minimum = find_minimum_local(solution, all_flights)
-write_report(solution, minimum)
-
-minimum = find_minimum_annealing(solution, all_flights)
-write_report(solution, minimum)
-
-# print_solution(solution)
-# print(f'Total price for this solution is {calculate_total_price(solution)}')
+genetic_main()
