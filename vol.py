@@ -252,7 +252,7 @@ def write_comparison_report(solution, minimum):
 
 def write_solution_report(solution):
     print(
-        f'Total price for this neighbour is {calculate_total_price(solutionc`x`)}')
+        f'Total price for this solution is {calculate_total_price(solution)}')
     duree_minutes = calculate_spent_time_in_mins(solution)
     (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
     print(
@@ -278,7 +278,7 @@ def slice(first_parent, second_parent, gene_slicer):
             second_child[key] = second_parent[key]
         else:
             first_child[key] = second_parent[key]
-            second_child[key] = second_parent[key]
+            second_child[key] = first_parent[key]
         slice_count = slice_count+1
     return (first_child, second_child)
 
