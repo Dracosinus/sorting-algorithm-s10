@@ -209,6 +209,14 @@ def find_minimum_local(solution):
     return best_neighbour
 
 
+def find_best_solution_of_pool(solution_pool):
+    current_best = solution_pool[0]
+    for solution in solution_pool:
+        if calculate_total_price(solution) < calculate_total_price(current_best):
+            current_best = solution
+    return current_best
+
+
 def simulated_annealing_neighbour(solution, neighbours):
     cool = 0.95
     if 'temperature' not in globals():
@@ -236,20 +244,6 @@ def find_minimum_annealing(solution):
     return best_neighbour
 
 
-def write_comparison_report(solution, minimum):
-    print(
-        f'Total price for this neighbour is {calculate_total_price(minimum)}')
-    duree_minutes = calculate_spent_time_in_mins(minimum)
-    (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
-    print(
-        f"Attendees will wait {duree_minutes} mins, meaning : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
-    print(f'It is cheaper than {calculate_total_price(solution)} where')
-    duree_minutes = calculate_spent_time_in_mins(solution)
-    (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
-    print(
-        f"Attendees would have waited : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
-
-
 def write_solution_report(solution):
     print(
         f'Total price for this solution is {calculate_total_price(solution)}')
@@ -257,6 +251,15 @@ def write_solution_report(solution):
     (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
     print(
         f"Attendees will wait {duree_minutes} mins, meaning : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
+
+
+def write_comparison_report(solution, minimum):
+    write_solution_report(minimum)
+    print(f'It is cheaper than {calculate_total_price(solution)} where')
+    duree_minutes = calculate_spent_time_in_mins(solution)
+    (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
+    print(
+        f"Attendees would have waited : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
 
 
 def monte_carlo_main(solution):
@@ -289,11 +292,18 @@ def genetic_main():
         solution = get_random_solution()
         genetic_solution_pool.append(find_minimum_local(solution))
     MAX_MUTATION = 5
-    mutated_solution_pool = genetic_solution_pool
-    for i in range(MAX_MUTATION):
-        mutated_solution_pool = mutate_solution(mutated_solution_pool)
+    mutated_solution_pool = mutate_solution(genetic_solution_pool)
+    MUTATIONS = 1
+    while (calculate_total_price(find_best_solution_of_pool(mutated_solution_pool)) < calculate_total_price(find_best_solution_of_pool(genetic_solution_pool))):
+        genetic_solution_pool = mutated_solution_pool
+        mutated_solution_pool = mutate_solution(genetic_solution_pool)
+        MUTATIONS += 1
+    print(f'After {MUTATIONS} mutations')
     for solution in mutated_solution_pool:
         write_solution_report(solution)
+    print("best solution of pool is :")
+    best_solution = find_best_solution_of_pool(mutated_solution_pool)
+    write_solution_report(best_solution)
 
 
 def mutate_solution(genetic_solution_pool):
