@@ -9,7 +9,7 @@ from datetime import datetime,time
 
 LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
 FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
-PRICE_PER_MINUTE = 1
+PRICE_PER_MINUTE = 5
 
 
 class Flight:
@@ -133,7 +133,15 @@ def calculate_spent_time_in_mins(solution):
             duration = flight.depart - FIRST_BUS_ARRIVAL
         difference_in_mins=duration.total_seconds() / 60.0
         spent_time+=difference_in_mins
+        # (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
+        # print(f'we just added {days} days, {hours} hours, {mins} mins')
     return spent_time
+
+def divide_mins_to_days_hours_mins(duree_minutes):
+    jours = duree_minutes // (24 * 60)
+    heures = (duree_minutes // 60) % 24
+    minutes = duree_minutes % 60
+    return (jours, heures, minutes)
 
 def get_neighbours(solution, all_flights):
     neighbours = []
@@ -174,7 +182,8 @@ def simulated_annealing_neighbour(solution, neighbours):
     if 'temperature' not in globals():
         globals()['temperature'] = 10000
     random_neighbour = random.choice(neighbours)
-    probability = math.e ** -(abs(calculate_total_price(random_neighbour) - calculate_total_price(solution))/globals()['temperature'])
+    ##probability = math.e ** -(abs(calculate_total_price(random_neighbour) - calculate_total_price(solution))/globals()['temperature'])
+    probability = math.e ** ((- calculate_total_price(random_neighbour) - calculate_total_price(solution))/globals()['temperature'])
     globals()['temperature'] = globals()['temperature']*cool
     if probability >= random.random():
         return random_neighbour
@@ -213,8 +222,13 @@ def generate_all_flights():
 
 def write_report(solution, minimum):
     print(f'Total price for this neighbour is {calculate_total_price(minimum)}')
-    print(f'Attendees will wait {calculate_spent_time_in_mins(minimum)} mins.')
-    print(f'It is cheaper than {calculate_total_price(solution)} where they would have waited {calculate_spent_time_in_mins(solution)} mins.')
+    duree_minutes = calculate_spent_time_in_mins(minimum)
+    (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
+    print(f"Attendees will wait {duree_minutes} mins, meaning : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
+    print(f'It is cheaper than {calculate_total_price(solution)} where')
+    duree_minutes = calculate_spent_time_in_mins(solution)
+    (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
+    print(f"Attendees would have waited : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
 
 # Main
 all_flights = generate_all_flights()
