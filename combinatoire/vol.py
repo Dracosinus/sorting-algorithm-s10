@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
+from typing import List
 import random
 import math
-from circular_linked_list import Node, CircularLinkedList
-from datetime import datetime, time
+from circular_linked_list import CircularLinkedList
 import all_flights_extractor
 from solution.py import Solution
 
@@ -35,21 +35,20 @@ def find_best_neighbour(solution, neighbours):
     return best_neighbour
 
 
-def find_minimum_local(solution):
+def find_minimum_local(solution: List[Solution]):
     current_best = solution
-    neighbours = get_neighbours(current_best)
-    best_neighbour = find_best_neighbour(current_best, neighbours)
-    while (best_neighbour != current_best):
+    best_neighbour = find_best_neighbour(current_best, current_best.neighbours)
+    while best_neighbour != current_best:
         current_best = best_neighbour
-        neighbours = get_neighbours(current_best)
-        best_neighbour = find_best_neighbour(current_best, neighbours)
+        best_neighbour = find_best_neighbour(
+            current_best, current_best.neighbours)
     return best_neighbour
 
 
-def find_best_solution_of_pool(solution_pool):
+def find_best_solution_of_pool(solution_pool: List[Solution]):
     current_best = solution_pool[0]
     for solution in solution_pool:
-        if calculate_total_price(solution) < calculate_total_price(current_best):
+        if solution.total_price < current_best.total_price:
             current_best = solution
     return current_best
 
