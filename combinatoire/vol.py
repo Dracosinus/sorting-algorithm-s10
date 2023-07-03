@@ -115,7 +115,6 @@ def simulated_annealing_neighbour(solution, neighbours):
     if 'temperature' not in globals():
         globals()['temperature'] = 10000
     random_neighbour = random.choice(neighbours)
-    # probability = math.e ** -(abs(calculate_total_price(random_neighbour) - calculate_total_price(solution))/globals()['temperature'])
     probability = math.e ** ((- calculate_total_price(random_neighbour) -
                              calculate_total_price(solution))/globals()['temperature'])
     globals()['temperature'] = globals()['temperature']*cool
