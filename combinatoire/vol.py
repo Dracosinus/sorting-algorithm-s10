@@ -1,15 +1,12 @@
 #!/usr/bin/python3
 
 import random
-import copy
 import math
 from circular_linked_list import Node, CircularLinkedList
 from datetime import datetime, time
 import all_flights_extractor
+from solution.py import Solution
 
-LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
-FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
-PRICE_PER_MINUTE = 5
 
 ALL_FLIGHTS = all_flights_extractor.generate_all_flights()
 
@@ -18,44 +15,7 @@ def get_random_solution():
     solution = {}
     for key, flights_list in ALL_FLIGHTS.items():
         solution[key] = random.choice(flights_list)
-    return solution
-
-
-def print_solution(solution):
-    for key, flight in solution.items():
-        print(f'For Key : {key}')
-        flight.to_string()
-
-def calculate_total_price(solution):
-    total_price = 0
-    for flight in solution.values():
-        total_price += flight.price
-
-        if flight.conf_role == 'incoming':
-            duration = LAST_BUS_DEPART - flight.arrive
-        else:
-            duration = flight.depart - FIRST_BUS_ARRIVAL
-        difference_in_mins = duration.total_seconds() / 60.0
-        waiting_price = difference_in_mins*PRICE_PER_MINUTE
-        if difference_in_mins >= 120:
-            waiting_price += 100
-        total_price += waiting_price
-
-    return total_price
-
-
-def calculate_spent_time_in_mins(solution):
-    spent_time = 0
-    for flight in solution.values():
-        if flight.conf_role == 'incoming':
-            duration = LAST_BUS_DEPART - flight.arrive
-        else:
-            duration = flight.depart - FIRST_BUS_ARRIVAL
-        difference_in_mins = duration.total_seconds() / 60.0
-        spent_time += difference_in_mins
-        # (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
-        # print(f'we just added {days} days, {hours} hours, {mins} mins')
-    return spent_time
+    return Solution(solution)
 
 
 def divide_mins_to_days_hours_mins(duree_minutes):
@@ -65,29 +25,13 @@ def divide_mins_to_days_hours_mins(duree_minutes):
     return (jours, heures, minutes)
 
 
-def get_neighbours(solution):
-    neighbours = []
-    for key, flight in solution.items():
-        flight_list = ALL_FLIGHTS[key]
-        index = flight_list.index(flight)
-        if index > 0:
-            neighbour = copy.copy(solution)
-            neighbour[key] = flight_list[index-1]
-            neighbours.append(neighbour)
-        if index+1 < len(flight_list):
-            neighbour = copy.copy(solution)
-            neighbour[key] = flight_list[index+1]
-            neighbours.append(neighbour)
-    return neighbours
-
-
 def find_best_neighbour(solution, neighbours):
     best_neighbour = solution
-    best_price = calculate_total_price(best_neighbour)
+    best_price = best_neighbour.total_price
     for neighbour in neighbours:
-        if calculate_total_price(neighbour) < best_price:
+        if neighbour.total_price < best_price:
             best_neighbour = neighbour
-            best_price = calculate_total_price(neighbour)
+            best_price = neighbour.total_price
     return best_neighbour
 
 
