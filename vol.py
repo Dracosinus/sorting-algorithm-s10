@@ -10,7 +10,6 @@ from datetime import datetime, time
 LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
 FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
 PRICE_PER_MINUTE = 5
-NUMBER_OF_GENETIC_POOL_MEMBERS = 8
 
 
 class Flight:
@@ -273,6 +272,16 @@ def annealing_main(solution):
 
 
 def slice(first_parent, second_parent, gene_slicer):
+    """cross two parents around a gene slicer to generate two childrens
+
+    Args:
+        first_parent (solution): 
+        second_parent (solution): 
+        gene_slicer (int): where to cut the parents genes
+
+    Returns:
+        (solution, solution): the two childrens
+    """
     first_child = second_child = {}
     slice_count = 0
     for key in first_parent.keys():
@@ -285,38 +294,66 @@ def slice(first_parent, second_parent, gene_slicer):
         slice_count = slice_count+1
     return (first_child, second_child)
 
+def elitism(solution_pool, survivors_percent):
+    """only a percentage of the best element from a solution survives
 
-def genetic_main():
+    Args:
+        solution_pool (List<solution>)
+        survivors_percent (float): percentage of survivors
+
+    Returns:
+        List<solution>
+    """
+    survivors_amount = math.floor(len(solution_pool)*survivors_percent)
+    survivors = []
+    while len(survivors) != survivors_amount:
+        best_solution = find_best_solution_of_pool(solution_pool)
+        survivors.append(best_solution)
+        solution_pool.remove(best_solution)
+    return survivors
+ 
+
+def genetic_main(genetic_pool_members=100, survivors_percent=0.1, pool_injection_percent=0.1, max_generation=5):
     genetic_solution_pool = []
-    for i in range(NUMBER_OF_GENETIC_POOL_MEMBERS):
+    
+    for i in range(genetic_pool_members):
         solution = get_random_solution()
-        genetic_solution_pool.append(find_minimum_local(solution))
-    MAX_MUTATION = 5
-    mutated_solution_pool = mutate_solution(genetic_solution_pool)
-    MUTATIONS = 1
-    while (calculate_total_price(find_best_solution_of_pool(mutated_solution_pool)) < calculate_total_price(find_best_solution_of_pool(genetic_solution_pool))):
-        genetic_solution_pool = mutated_solution_pool
-        mutated_solution_pool = mutate_solution(genetic_solution_pool)
-        MUTATIONS += 1
-    print(f'After {MUTATIONS} mutations')
-    for solution in mutated_solution_pool:
+        genetic_solution_pool.append(solution)
+
+    generation_pool = genetic_solution_pool
+    for i in range(max_generation):
+        survivors = elitism(generation_pool, survivors_percent)
+        next_generation_pool = mutate_solution(survivors)
+
+        for i in range(math.floor(pool_injection_percent*genetic_pool_members)):
+            if len(next_generation_pool) < genetic_pool_members:
+                next_generation_pool.append(get_random_solution())
+
+        while len(next_generation_pool) != genetic_pool_members:
+            next_generation_pool.append(random.choice(get_neighbours(random.choice(survivors))))
+
+        generation_pool = next_generation_pool
+
+    final_survivors = elitism(generation_pool, survivors_percent)
+    print(f'After {max_generation} generations')
+    for solution in final_survivors:
         write_solution_report(solution)
     print("best solution of pool is :")
-    best_solution = find_best_solution_of_pool(mutated_solution_pool)
+    best_solution = find_best_solution_of_pool(final_survivors)
     write_solution_report(best_solution)
 
 
 def mutate_solution(genetic_solution_pool):
-    mutated_solution_pool = []
-    for k in range(int(NUMBER_OF_GENETIC_POOL_MEMBERS/2)):
+    generation_pool = []
+    for k in range(int(len(generation_pool)/2)):
         gene_slicer = random.randint(0, 17)
         first_parent = genetic_solution_pool[2*k]
         second_parent = genetic_solution_pool[2*k+1]
         (first_child, second_child) = slice(
             first_parent, second_parent, gene_slicer)
-        mutated_solution_pool.append(find_minimum_local(first_child))
-        mutated_solution_pool.append(find_minimum_local(second_child))
-    return mutated_solution_pool
+        generation_pool.append(find_minimum_local(first_child))
+        generation_pool.append(find_minimum_local(second_child))
+    return generation_pool
 
 
 # Main
