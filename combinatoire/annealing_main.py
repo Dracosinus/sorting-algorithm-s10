@@ -32,11 +32,11 @@ def simulated_annealing_neighbour(solution, neighbours):
 
 def find_minimum_annealing(solution):
     current_best = solution
-    neighbours = current_best.get_neighbour
+    neighbours = current_best.get_neighbours()
     best_neighbour = simulated_annealing_neighbour(current_best, neighbours)
     while (globals()['temperature'] >= 20):
         current_best = best_neighbour
-        neighbours = current_best.get_neighbour
+        neighbours = current_best.get_neighbours()
         best_neighbour = simulated_annealing_neighbour(
             current_best, neighbours)
     return best_neighbour
