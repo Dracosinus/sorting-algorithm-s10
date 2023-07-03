@@ -19,7 +19,7 @@ class Solution(object):
     """A solution is a map of 18 flights with both flights for each 9 participants
 
     Args:
-        object (List[Flight]): the map to create the object
+        object (Dict[str, Flight]): the map to create the object
 
     Returns:
         Solution: the solution object
@@ -78,8 +78,8 @@ class Solution(object):
                 duration = flight.depart - FIRST_BUS_ARRIVAL
             difference_in_mins = duration.total_seconds() / 60
             spent_time += difference_in_mins
-            (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
-            print(f'we just added {days} days, {hours} hours, {mins} mins')
+            # (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
+            # print(f'we just added {days} days, {hours} hours, {mins} mins')
         return spent_time
 
     def get_neighbours(self) -> List[Solution]:
