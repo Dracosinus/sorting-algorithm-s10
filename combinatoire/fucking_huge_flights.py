@@ -1,6 +1,8 @@
-from datetime import datetime, time
+from datetime import datetime
 
 class Flight:
+    """Flight object storing data from provided XML
+    """
     def __init__(self, price, stops, orig, dest, depart, arrive, airline_display, conf_role):
         self.price = price
         self.stops = stops

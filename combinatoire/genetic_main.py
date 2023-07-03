@@ -3,19 +3,11 @@
 from typing import List
 import random
 import math
-from circular_linked_list import CircularLinkedList
-import all_flights_extractor
+from extractor_but_better import ALL_FLIGHTS
+
 from solution import Solution
-
-
-ALL_FLIGHTS = all_flights_extractor.generate_all_flights()
-
-
-def get_random_solution():
-    solution = {}
-    for key, flights_list in ALL_FLIGHTS.items():
-        solution[key] = random.choice(flights_list)
-    return Solution(solution)
+from circular_linked_list import CircularLinkedList
+from solution_helper import get_random_solution
 
 
 def find_best_solution_of_pool(solution_pool: List[Solution]):

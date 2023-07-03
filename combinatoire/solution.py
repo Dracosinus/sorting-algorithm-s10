@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 
-from typing import List
-from flight import Flight
-import all_flights_extractor
-from datetime import datetime, time
+from __future__ import annotations
+from typing import List, Dict
+from datetime import datetime
 import copy
+from fucking_huge_flights import Flight
+from extractor_but_better import ALL_FLIGHTS
+
 from time_helper import divide_mins_to_days_hours_mins
 
 
 LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
 FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
 PRICE_PER_MINUTE = 5
-ALL_FLIGHTS = all_flights_extractor.generate_all_flights()
 
 
 class Solution(object):
-    """A solution is a map of 18 flights containing a ongoing and outgoing flight for each 9 participants
+    """A solution is a map of 18 flights with both flights for each 9 participants
 
     Args:
         object (List[Flight]): the map to create the object
@@ -23,11 +24,11 @@ class Solution(object):
     Returns:
         Solution: the solution object
     """
-    solution_map: List[Flight]
-    total_price: int
+    solution_map: Dict[str, Flight]
+    total_price: float
 
     def __init__(self,
-                 solution_map: List[Flight]) -> None:
+                 solution_map: Dict[str, Flight]) -> None:
         self.solution_map = solution_map
         self.total_price = self.calculate_total_price()
 
@@ -38,7 +39,7 @@ class Solution(object):
             print(f'For Key : {key}')
             flight.to_string()
 
-    def calculate_total_price(self):
+    def calculate_total_price(self) -> float:
         """Calculates the price of the flight, including time wasters, counting
         - the flight prices
         - a price per minute waited
@@ -63,7 +64,7 @@ class Solution(object):
 
         return total_price
 
-    def calculate_spent_time_in_mins(self):
+    def calculate_spent_time_in_mins(self) -> float:
         """counts the amount of time participants will have waited for both their flights
 
         Returns:
@@ -81,7 +82,7 @@ class Solution(object):
             # print(f'we just added {days} days, {hours} hours, {mins} mins')
         return spent_time
 
-    def get_neighbours(self):
+    def get_neighbours(self) -> List[Solution]:
         """Every possible neighbours
 
         Returns:
@@ -89,7 +90,8 @@ class Solution(object):
         """
         neighbours = []
         for key, flight in self.solution_map.items():
-            flight_list = ALL_FLIGHTS[key]
+            flight_list: List[Flight] = ALL_FLIGHTS[key]
+
             index = flight_list.index(flight)
             if index > 0:
                 neighbour = copy.copy(self.solution_map)
@@ -101,7 +103,12 @@ class Solution(object):
                 neighbours.append(Solution(neighbour))
         return neighbours
 
-    def find_best_neighbour(self):
+    def find_best_neighbour(self) -> Solution:
+        """the cheapest neighbour
+
+        Returns:
+            Solution:
+        """
         neighbours = self.get_neighbours()
         best_neighbour = self
         best_price = best_neighbour.total_price
@@ -112,6 +119,8 @@ class Solution(object):
         return best_neighbour
 
     def write_report(self):
+        """A report with time spent included
+        """
         print(
             f'Total price for this solution is {self.total_price}')
         duree_minutes = self.calculate_spent_time_in_mins()
