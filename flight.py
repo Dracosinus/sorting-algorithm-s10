@@ -22,3 +22,15 @@ class Flight:
         airline_display = element.find('airline_display').text
 
         return cls(price, stops, orig, dest, depart, arrive, airline_display, 'incoming')
+    
+    def to_string(self):
+        print('Price:', self.price)
+        print('Stops:', self.stops)
+        print('Origin:', self.orig)
+        print('Destination:', self.dest)
+        print('Departure:', self.depart)
+        print('Arrival:', self.arrive)
+        print('Airline:', self.airline_display)
+        print('ConfRole:', self.conf_role)
+        print('---')
+
