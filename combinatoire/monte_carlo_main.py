@@ -1,9 +1,5 @@
 #!/usr/bin/python3
 
-from typing import List
-import random
-from extractor_but_better import ALL_FLIGHTS
-
 from solution_helper import get_random_solution, write_comparison_report
 from solution import Solution
 

@@ -4,8 +4,8 @@ from __future__ import annotations
 from typing import List, Dict
 from datetime import datetime
 import copy
-from fucking_huge_flights import Flight
-from extractor_but_better import ALL_FLIGHTS
+from flight import Flight
+from flight_extractor import ALL_FLIGHTS
 
 from time_helper import divide_mins_to_days_hours_mins
 
@@ -78,8 +78,8 @@ class Solution(object):
                 duration = flight.depart - FIRST_BUS_ARRIVAL
             difference_in_mins = duration.total_seconds() / 60
             spent_time += difference_in_mins
-            # (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
-            # print(f'we just added {days} days, {hours} hours, {mins} mins')
+            (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
+            print(f'we just added {days} days, {hours} hours, {mins} mins')
         return spent_time
 
     def get_neighbours(self) -> List[Solution]:

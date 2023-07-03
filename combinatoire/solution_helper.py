@@ -1,7 +1,7 @@
 import random
 from solution import Solution
 from time_helper import divide_mins_to_days_hours_mins
-from extractor_but_better import ALL_FLIGHTS
+from flight_extractor import ALL_FLIGHTS
 
 
 def write_comparison_report(solution: Solution, minimum: Solution):

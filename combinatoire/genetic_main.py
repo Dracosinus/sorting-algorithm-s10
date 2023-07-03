@@ -3,7 +3,6 @@
 from typing import List
 import random
 import math
-from extractor_but_better import ALL_FLIGHTS
 
 from solution import Solution
 from circular_linked_list import CircularLinkedList
@@ -64,6 +63,20 @@ def elitism(solution_pool, survivors_percent):
 
 
 def genetic_main(genetic_pool_members=100, survivors_percent=0.1, crossing_expected_percent=0.4, pool_injection_percent=0.1, max_generation=5):
+    """genetic logic get an heuristic set of decent solutions
+    At every generation, many pool members 'dies' letting a small amount of performant survivors
+    We cross the ~~genes~~ flights of the survivors to generate new solutions
+    We keep the survivors
+    We also use new blood to allow expanding solutions
+    We also use neighbours from the survivors
+
+    Args:
+        genetic_pool_members (int, optional): Amount of solutions at each generation. Defaults to 100.
+        survivors_percent (float, optional): Surviving solutions at each generation. Defaults to 0.1.
+        crossing_expected_percent (float, optional): Percentage of solutions built by crossing survivors to replace dead. Defaults to 0.4.
+        pool_injection_percent (float, optional): New solutions added to the pool. Defaults to 0.1.
+        max_generation (int, optional): The amount of generations. Defaults to 5.
+    """
     genetic_solution_pool = []
 
     for i in range(genetic_pool_members):
@@ -74,14 +87,20 @@ def genetic_main(genetic_pool_members=100, survivors_percent=0.1, crossing_expec
         survivors = elitism(generation_pool, survivors_percent)
         next_generation_pool = cross_survivors(survivors, math.floor(
             genetic_pool_members*crossing_expected_percent))
+        for survivor in survivors:
+            if len(next_generation_pool) < genetic_pool_members:
+                next_generation_pool.append(survivor)
 
         for i in range(math.floor(pool_injection_percent*genetic_pool_members)):
             if len(next_generation_pool) < genetic_pool_members:
                 next_generation_pool.append(get_random_solution())
-
+        
+        next_generation_pool = list(set(next_generation_pool))
         while len(next_generation_pool) < genetic_pool_members:
-            next_generation_pool.append(random.choice(
-                random.choice(survivors).get_neighbours()))
+            close_neighbour = random.choice(
+                random.choice(survivors).get_neighbours())
+            if close_neighbour not in next_generation_pool:
+                next_generation_pool.append(close_neighbour)
 
         generation_pool = next_generation_pool
 
@@ -92,14 +111,14 @@ def genetic_main(genetic_pool_members=100, survivors_percent=0.1, crossing_expec
     print("\nbest solution of pool is :")
     best_solution = find_best_solution_of_pool(final_survivors)
     best_solution.write_report()
-
+    
 
 def cross_survivors(survivors, crossing_expected):
     """Cross survivors between themselves by slicing them together randomly
 
     Args:
         survivors (List[solution]): solution pool that you want to evolve from
-        crossing_expected (int, optional): the amount of chil. Defaults to 40.
+        crossing_expected (int, optional): the amount of childs. Defaults to 40.
 
     Returns:
         List[solution]: wider solution pool to work with
@@ -133,4 +152,4 @@ def cross_survivors(survivors, crossing_expected):
 
 
 # Main
-genetic_main()
+genetic_main(max_generation=150)

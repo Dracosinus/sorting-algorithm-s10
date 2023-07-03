@@ -3,11 +3,10 @@
 import xml.etree.ElementTree as ET
 import os
 from datetime import datetime
-from fucking_huge_flights import Flight
+from flight import Flight
 
 LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
 FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
-PRICE_PER_MINUTE = 5
 
 
 def load_flights_from_xml(filename):
@@ -22,6 +21,7 @@ def load_flights_from_xml(filename):
             if flight.depart >= FIRST_BUS_ARRIVAL:
                 flights.append(flight)
         else:
+            flight.conf_role = 'incoming'
             if flight.arrive <= LAST_BUS_DEPART:
                 flights.append(flight)
     return flights
@@ -61,22 +61,27 @@ def generate_all_flights():
     base_directory = os.getcwd()+'/'
 
     directory_0726 = 'ThirdParty/FlightData/2010/07-26/'
-    cheapest_flights_0726 = find_all_flights_in_directory(base_directory+directory_0726)
+    cheapest_flights_0726 = find_all_flights_in_directory(
+        base_directory+directory_0726)
 
     directory_0727 = 'ThirdParty/FlightData/2010/07-27/'
-    cheapest_flights_0727 = find_all_flights_in_directory(base_directory+directory_0727)
+    cheapest_flights_0727 = find_all_flights_in_directory(
+        base_directory+directory_0727)
     ongoing_flights = merge_flights(
         cheapest_flights_0726, cheapest_flights_0727)
 
     directory_0803 = 'ThirdParty/FlightData/2010/08-03/'
-    cheapest_flights_0803 = find_all_flights_in_directory(base_directory+directory_0803)
+    cheapest_flights_0803 = find_all_flights_in_directory(
+        base_directory+directory_0803)
 
     directory_0804 = 'ThirdParty/FlightData/2010/08-04/'
-    cheapest_flights_0804 = find_all_flights_in_directory(base_directory+directory_0804)
+    cheapest_flights_0804 = find_all_flights_in_directory(
+        base_directory+directory_0804)
     outgoing_flights = merge_flights(
         cheapest_flights_0803, cheapest_flights_0804)
 
     all_flights = merge_flights(ongoing_flights, outgoing_flights)
     return all_flights
+
 
 ALL_FLIGHTS = generate_all_flights()
