@@ -114,6 +114,17 @@ class Solution(object):
             # (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
             # print(f'we just added {days} days, {hours} hours, {mins} mins')
         return spent_time
+    
+    def calculate_dollar_price(self) -> float:
+        """sums price of all flights
+
+        Returns:
+            float:
+        """
+        dollar_price = 0
+        for flight in self.solution_map.values():
+            dollar_price += flight.price
+        return dollar_price
 
     def get_neighbours(self) -> List[Solution]:
         """Every possible neighbours
@@ -155,8 +166,8 @@ class Solution(object):
         """A report with time spent included
         """
         print(
-            f'Total price for this solution is {self.total_price}')
+            f'Solution report \n + Total Price: {self.total_price}\n + Dollar Price: {self.calculate_dollar_price()}')
         duree_minutes = self.calculate_spent_time_in_mins()
         (jours, heures, minutes) = divide_mins_to_days_hours_mins(duree_minutes)
         print(
-            f"Attendees will wait {duree_minutes} mins, meaning : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
+            f" + Wait time mins: {duree_minutes} \n + Wait time detail: {jours} day(s), {heures} hour(s), {minutes} minute(s)")

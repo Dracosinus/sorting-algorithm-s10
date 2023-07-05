@@ -1,17 +1,12 @@
 import random
 from solution import Solution
-from time_helper import divide_mins_to_days_hours_mins
 from flight_extractor import ALL_FLIGHTS
 
 
 def write_comparison_report(solution: Solution, minimum: Solution):
     minimum.write_report()
-    print(f'It is cheaper than {solution.total_price} where')
-    (jours, heures, minutes) = divide_mins_to_days_hours_mins(
-        solution.calculate_spent_time_in_mins())
-    print(
-        f"Attendees would have waited : {jours} day(s), {heures} hour(s), {minutes} minute(s)")
-
+    print('\n It is, in theory, cheaper than the solution it derives from :')
+    solution.write_report()
 
 def get_random_solution():
     solution = {}
