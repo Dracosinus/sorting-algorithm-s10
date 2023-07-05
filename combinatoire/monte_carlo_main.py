@@ -4,7 +4,7 @@ from solution_helper import get_random_solution, write_comparison_report
 from solution import Solution
 
 
-def find_minimum_local(solution: Solution):
+def find_minimum_local(solution: Solution) -> Solution:
     current_best = solution
     best_neighbour = current_best.find_best_neighbour()
     while best_neighbour != current_best:
@@ -13,6 +13,6 @@ def find_minimum_local(solution: Solution):
     return best_neighbour
 
 
-solution = get_random_solution()
-minimum = find_minimum_local(solution)
-write_comparison_report(solution, minimum)
+random_solution = get_random_solution()
+minimum = find_minimum_local(random_solution)
+write_comparison_report(random_solution, minimum)

@@ -9,7 +9,15 @@ from circular_linked_list import CircularLinkedList
 from solution_helper import get_random_solution
 
 
-def find_best_solution_of_pool(solution_pool: List[Solution]):
+def find_best_solution_of_pool(solution_pool: List[Solution]) -> Solution:
+    """Returns the best Solution of a given solution list cost-wise
+
+    Args:
+        solution_pool (List[Solution])
+
+    Returns:
+        Solution: 
+    """
     current_best = solution_pool[0]
     for solution in solution_pool:
         if solution.total_price < current_best.total_price:
@@ -94,7 +102,7 @@ def genetic_main(genetic_pool_members=100, survivors_percent=0.1, crossing_expec
         for i in range(math.floor(pool_injection_percent*genetic_pool_members)):
             if len(next_generation_pool) < genetic_pool_members:
                 next_generation_pool.append(get_random_solution())
-        
+
         next_generation_pool = list(set(next_generation_pool))
         while len(next_generation_pool) < genetic_pool_members:
             close_neighbour = random.choice(
@@ -111,7 +119,7 @@ def genetic_main(genetic_pool_members=100, survivors_percent=0.1, crossing_expec
     print("\nbest solution of pool is :")
     best_solution = find_best_solution_of_pool(final_survivors)
     best_solution.write_report()
-    
+
 
 def cross_survivors(survivors, crossing_expected):
     """Cross survivors between themselves by slicing them together randomly
