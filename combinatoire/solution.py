@@ -9,9 +9,6 @@ from flight_extractor import ALL_FLIGHTS
 
 from time_helper import divide_mins_to_days_hours_mins
 
-
-LAST_BUS_DEPART = datetime.fromisoformat('2010-07-27 17:00:00')
-FIRST_BUS_ARRIVAL = datetime.fromisoformat('2010-08-03 15:00:00')
 PRICE_PER_MINUTE = 5
 
 
@@ -25,11 +22,15 @@ class Solution(object):
         Solution: the solution object
     """
     solution_map: Dict[str, Flight]
+    latest_bus_depart: datetime
+    first_bus_arrival: datetime
     total_price: float
 
     def __init__(self,
                  solution_map: Dict[str, Flight]) -> None:
         self.solution_map = solution_map
+        self.latest_bus_depart = self.find_latest_bus_depart()
+        self.first_bus_arrival = self.find_first_bus_arrival()
         self.total_price = self.calculate_total_price()
 
     def to_string(self):
@@ -38,6 +39,38 @@ class Solution(object):
         for key, flight in self.solution_map.items():
             print(f'For Key : {key}')
             flight.to_string()
+
+    def find_latest_bus_depart(self) -> datetime:
+        """returns the last bus depart for the incoming flights
+
+        Returns:
+            datetime:
+        """
+        for flight in self.solution_map.values():
+            if flight.conf_role == 'incoming':
+                latest_bus_depart = flight.arrive
+                break
+        for flight in self.solution_map.values():
+            if flight.conf_role == 'incoming':
+                if flight.arrive > latest_bus_depart:
+                    latest_bus_depart = flight.arrive
+        return latest_bus_depart
+
+    def find_first_bus_arrival(self) -> datetime:
+        """returns the fist bus arrival for the outgoing flights
+
+        Returns:
+            datetime:
+        """
+        for flight in self.solution_map.values():
+            if flight.conf_role == 'outgoing':
+                first_bus_arrival = flight.depart
+                break
+        for flight in self.solution_map.values():
+            if flight.conf_role == 'outgoing':
+                if flight.depart < first_bus_arrival:
+                    first_bus_arrival = flight.depart
+        return first_bus_arrival
 
     def calculate_total_price(self) -> float:
         """Calculates the price of the flight, including time wasters, counting
@@ -53,9 +86,9 @@ class Solution(object):
             total_price += flight.price
 
             if flight.conf_role == 'incoming':
-                duration = LAST_BUS_DEPART - flight.arrive
+                duration = self.latest_bus_depart - flight.arrive
             else:
-                duration = flight.depart - FIRST_BUS_ARRIVAL
+                duration = flight.depart - self.first_bus_arrival
             difference_in_mins = duration.total_seconds() / 60.0
             waiting_price = difference_in_mins*PRICE_PER_MINUTE
             if difference_in_mins >= 120:
@@ -73,9 +106,9 @@ class Solution(object):
         spent_time = 0
         for flight in self.solution_map.values():
             if flight.conf_role == 'incoming':
-                duration = LAST_BUS_DEPART - flight.arrive
+                duration = self.latest_bus_depart - flight.arrive
             else:
-                duration = flight.depart - FIRST_BUS_ARRIVAL
+                duration = flight.depart - self.first_bus_arrival
             difference_in_mins = duration.total_seconds() / 60
             spent_time += difference_in_mins
             # (days, hours, mins) = divide_mins_to_days_hours_mins(difference_in_mins)
