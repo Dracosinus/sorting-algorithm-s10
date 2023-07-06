@@ -58,8 +58,6 @@ def get_friends_map(person, distance_function):
                 critics[person], movies_notes)})
     return friends
 
-# print(get_friends_map('Lisa Rose',euclid_on_maps_normalized))
-
 
 def rank_friends(person, distance_function):
     """pretty print ranking with the other people in the critics order by their similarities with person
@@ -104,10 +102,6 @@ def pearson_on_maps(map_a, map_b):
     return numerator/denominator
 
 
-# print(pearson_on_maps(critics['Lisa Rose'],critics['Gene Seymour']))
-# rank_friends('Lisa Rose', pearson_on_maps)
-# rank_friends('Lisa Rose', euclid_on_maps_normalized)
-
 def get_all_films():
     """retrieves all films from the critics
     """
@@ -117,8 +111,6 @@ def get_all_films():
             if not all_films.__contains__(film):
                 all_films.append(film)
     return all_films
-
-# print(get_all_films())
 
 
 def get_all_film_unwatched_by(person):
@@ -152,8 +144,6 @@ def get_recommandation(friend_map, movie):
             sim_sum += friend_map[person]
             sx_sum += friend_map[person]*critics[person][movie]
     return sx_sum/sim_sum
-
-# print(get_recommandation(get_friends_map('Toby',pearson_on_maps),'The Night Listener'))
 
 
 def get_recommandation_map(person, distance_function):
@@ -222,9 +212,6 @@ def get_movies_map(movie, distance_function):
                 films_critics[movie], person_notes)})
     return similar_movies
 
-
-# print(get_movies_map('Superman Returns', euclid_on_maps_normalized))
-# print(get_movies_map('Superman Returns', pearson_on_maps))
 
 def compare_movies(movie, distance_function):
     """pretty print ranking movies by similarities found by persons liking them

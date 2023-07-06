@@ -11,7 +11,6 @@ from time_helper import divide_mins_to_days_hours_mins
 
 PRICE_PER_MINUTE = 5
 
-
 class Solution(object):
     """A solution is a map of 18 flights with both flights for each 9 participants
 
