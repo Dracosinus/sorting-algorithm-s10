@@ -79,7 +79,7 @@ def node_to_dict(node):
     if node is None:
         return None
 
-    if node.left_child is None and node.right_child is None:  # If leaf node
+    if node.left_child is None and node.right_child is None:
         return {"name": node.name}
     else:
         return {
@@ -87,9 +87,8 @@ def node_to_dict(node):
             "children": [node_to_dict(node.left_child), node_to_dict(node.right_child)]
         }
 
-# tree_dict = node_to_dict(clustering_main())
+tree_dict = node_to_dict(clustering_main())
 
-
-# with open('tree.json', 'w') as f:
-#     json.dump(tree_dict, f, indent=2)
+with open('tree.json', 'w') as f:
+    json.dump(tree_dict, f, indent=2)
 

@@ -124,8 +124,6 @@ def get_all_film_unwatched_by(person):
         films.remove(film)
     return films
 
-# print(get_all_film_unwatched_by('Toby'))
-
 
 def get_recommandation(friend_map, movie):
     """recommends a movie to someone

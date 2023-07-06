@@ -43,11 +43,9 @@ def find_all_flights_in_directory(directory):
 def merge_flights(flights1, flights2):
     merged_flights = {}
 
-    # Merge flights from the first dictionary
     for key, flights in flights1.items():
         merged_flights[key] = flights
 
-    # Merge flights from the second dictionary
     for key, flights in flights2.items():
         if key in merged_flights:
             merged_flights[key].extend(flights)
