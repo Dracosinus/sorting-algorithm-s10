@@ -2,3 +2,5 @@ combinatoire/__pycache__/
 clustering/.~lock.algo_clustering.pptx#
 classifier-venv/
 clustering/__pycache__/
+clustering/tree.json
+clustering/node_modules/
