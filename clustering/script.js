@@ -5,9 +5,6 @@ var option;
 myChart.showLoading();
 $.get('tree.json', function (data) {
   myChart.hideLoading();
-  data.children.forEach(function (datum, index) {
-    index % 2 === 0 && (datum.collapsed = true);
-  });
   myChart.setOption(
     (option = {
       tooltip: {
@@ -33,7 +30,9 @@ $.get('tree.json', function (data) {
             label: {
               position: 'right',
               verticalAlign: 'middle',
-              align: 'left'
+              align: 'left',
+              rotate: 45,
+              fontSize: 6
             }
           },
           emphasis: {

@@ -19,8 +19,5 @@ python3 monte_carlo_main.py
 
 Dans clustering main la sortie du programme est un fichier tree.json qui sert d'entrée au fichier script.js
 Vous pouvez afficher le graphique en lançant un serveur local dans le dossier clustering
-```
-python3 -m http.server
-```
-Le graphique suivant s'affichera dans votre navigateur port 8000 `http://localhost:8000/`
 
+![Resultats du clustering](./clustering/clustering_graph.png)
